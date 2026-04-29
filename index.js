@@ -5,7 +5,7 @@ import { fileURLToPath } from "url";
 import dotenv from "dotenv";
 
 // Force reload env from .env file, ignoring system variables
-delete process.env.OPENAI_API_KEY;
+//delete process.env.OPENAI_API_KEY;
 dotenv.config();
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
