@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Design Idea Suggestions</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1a1f3a 100%);
+            color: #e2e8f0;
+            min-height: 100vh;
+            padding: 2rem 1rem;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, #60a5fa, #34d399);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            color: #94a3b8;
+            margin-bottom: 2rem;
+            font-size: 1.1rem;
+        }
+
+        .input-section {
+            background: rgba(15, 23, 42, 0.8);
+            border: 1px solid rgba(148, 163, 184, 0.1);
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            backdrop-filter: blur(10px);
+        }
+
+        .form-group {
+            display: grid;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+        }
+
+        label {
+            font-size: 0.95rem;
+            font-weight: 500;
+            color: #cbd5e1;
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 140px;
+            padding: 1rem;
+            background: #020617;
+            border: 1px solid #1f2937;
+            border-radius: 12px;
+            color: #e2e8f0;
+            font-family: inherit;
+            font-size: 1rem;
+            resize: vertical;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .button-row {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        button {
+            padding: 0.75rem 1.5rem;
+            border-radius: 10px;
+            border: none;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        #generateBtn {
+            background: #2563eb;
+            color: white;
+            flex: 1;
+        }
+
+        #generateBtn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(37, 99, 235, 0.3);
+        }
+
+        #generateBtn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .status {
+            height: 1.5rem;
+            color: #93c5fd;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .status.error {
+            color: #fb7185;
+        }
+
+        .status.loading::after {
+            content: "";
+            display: inline-block;
+            width: 1rem;
+            height: 1rem;
+            border: 2px solid rgba(147, 197, 253, 0.3);
+            border-top-color: #93c5fd;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .results-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .suggestion-card {
+            background: rgba(15, 23, 42, 0.8);
+            border: 2px solid;
+            border-radius: 16px;
+            padding: 1.5rem;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+
+        .suggestion-card.improved {
+            border-color: #16a34a;
+        }
+
+        .suggestion-card.alternative {
+            border-color: #2563eb;
+        }
+
+.suggestion-card.challenges {
+      border-color: #f59e0b;
+    }
+
+    .suggestion-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.3);
+    }
+
+    .card-label {
+      font-size: 0.85rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.75rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .suggestion-card.improved .card-label {
+      color: #86efac;
+    }
+
+    .suggestion-card.alternative .card-label {
+      color: #93c5fd;
+    }
+
+    .suggestion-card.challenges .card-label {
+            color: #fcd34d;
+        }
+
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 0.75rem;
+            color: #f8fafc;
+        }
+
+        .card-description {
+            font-size: 0.95rem;
+            line-height: 1.6;
+            color: #cbd5e1;
+            margin-bottom: 1rem;
+        }
+
+        .card-explanation {
+            font-size: 0.9rem;
+            font-style: italic;
+            color: #94a3b8;
+            padding: 0.75rem;
+            background: rgba(0, 0, 0, 0.2);
+            border-left: 2px solid currentColor;
+            border-radius: 4px;
+            margin-bottom: 1rem;
+        }
+
+        .card-actions {
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+        }
+
+        .card-actions button {
+            flex: 1;
+            min-width: 100px;
+            padding: 0.6rem 1rem;
+            font-size: 0.9rem;
+            background: #111827;
+            border: 1px solid #334155;
+            color: #e2e8f0;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+        }
+
+        .card-actions button:hover {
+            background: #1f2937;
+            transform: translateY(-1px);
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 1.8rem;
+            }
+
+            .results-section {
+                grid-template-columns: 1fr;
+            }
+
+            .button-row {
+                flex-direction: column;
+            }
+
+            #generateBtn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Design Suggestion Generator</h1>
+        <p class="subtitle">Enter your design idea and get three perspectives</p>
+
+        <div class="input-section">
+            <div class="form-group">
+                <label for="prompt">Your Design Idea</label>
+                <textarea id="prompt" placeholder="Describe your design idea, concept, or product..."></textarea>
+            </div>
+            <div class="button-row">
+                <button id="generateBtn" onclick="generateSuggestions()">Generate Suggestions</button>
+            </div>
+            <div class="status" id="status"></div>
+        </div>
+
+        <div class="results-section" id="results"></div>
+    </div>
+
+    <script>
+        const resultsEl = document.getElementById('results');
+        const statusEl = document.getElementById('status');
+        const generateBtn = document.getElementById('generateBtn');
+
+        async function generateSuggestions() {
+            const idea = document.getElementById("prompt").value.trim();
+            
+            if (!idea) {
+                setStatus("Please enter your design idea first.", "error");
+                return;
+            }
+            
+            setStatus("Generating suggestions...", "loading");
+            resultsEl.innerHTML = "";
+            generateBtn.disabled = true;
+            
+            try {
+                const response = await fetch('/api/get-suggestions', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ idea })
+                });
+                
+                if (!response.ok) {
+                    const error = await response.text();
+                    throw new Error(error || `Server error: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                renderSuggestions(data);
+                setStatus("Suggestions generated!");
+            } catch (error) {
+                setStatus(error.message, "error");
+            } finally {
+                generateBtn.disabled = false;
+            }
+        }
+
+        function renderSuggestions(data) {
+            resultsEl.innerHTML = "";
+            
+            const suggestions = [
+                {
+                    key: "improved",
+                    label: "✨ Improved",
+                    type: "improved",
+                    data: data.improved
+                },
+                {
+                    key: "alternative",
+                    label: "🔄 Alternative",
+                    type: "alternative",
+                    data: data.alternative
+                },
+                {
+                    key: "challenges",
+                    label: "⚠️ Challenges & Concerns",
+                    type: "challenges",
+                    data: data.challenges
+                }
+            ];
+
+            suggestions.forEach(suggestion => {
+                const card = createCard(suggestion);
+                resultsEl.appendChild(card);
+            });
+        }
+
+        function createCard(suggestion) {
+            const card = document.createElement("div");
+            card.className = `suggestion-card ${suggestion.type}`;
+            
+            const label = document.createElement("div");
+            label.className = "card-label";
+            label.textContent = suggestion.label;
+            
+            const title = document.createElement("h3");
+            title.className = "card-title";
+            title.textContent = suggestion.data.title || "Untitled";
+            
+            const description = document.createElement("p");
+            description.className = "card-description";
+            description.textContent = suggestion.data.description || "No description available.";
+            
+            card.append(label, title, description);
+            
+            // Handle both "explanation" (old) and "suggestion" (new)
+            const extraText = suggestion.data.explanation || suggestion.data.suggestion;
+            if (extraText) {
+                const extra = document.createElement("p");
+                extra.className = "card-explanation";
+                extra.innerHTML = suggestion.data.suggestion 
+                    ? `<strong>How to address:</strong> ${extraText}`
+                    : `<strong>Why:</strong> ${extraText}`;
+                card.appendChild(extra);
+            }
+            
+            const actions = document.createElement("div");
+            actions.className = "card-actions";
+            
+            card.appendChild(actions);
+            
+            return card;
+        }
+
+        function setStatus(message, type = "info") {
+            statusEl.textContent = message;
+            statusEl.className = `status ${type}`;
+        }
+    </script>
+</body>
+</html>
