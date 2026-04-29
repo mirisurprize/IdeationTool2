@@ -37,7 +37,11 @@ app.post('/api/get-suggestions', async (req, res) => {
       model: "gpt-4o",
       messages: [{
         role: "user",
-        content: `You are a design critique expert. A designer has proposed this idea:\n\n"${idea}"\n\nProvide an IMPROVED version of this idea. Keep the core concept but suggest enhancements, refinements, or better execution.\n\nRespond with ONLY a valid JSON object (no markdown, no backticks, no extra text). Use these exact fields:\n{"title": "short name for the improvement", "description": "3-4 sentences explaining the enhancement"}`
+        content: `You are a design expert. 
+        A designer has proposed this idea:\n\n"${idea}"\n\nProvide an IMPROVED version of this idea. 
+        Keep the core concept but suggest enhancements, refinements, or better execution. Keep it concise and simple to understand, no need for lengthy explanations.\n\nRespond with ONLY a valid JSON object 
+        (no markdown, no backticks, no extra text). 
+        Use these exact fields:\n{"title": "short name for the improvement", "description": "3-4 sentences explaining the enhancement"}`
       }],
       temperature: 0.7,
     });
@@ -47,7 +51,10 @@ app.post('/api/get-suggestions', async (req, res) => {
       model: "gpt-4o",
       messages: [{
         role: "user",
-        content: `You are a creative design strategist. A designer has proposed:\n\n"${idea}"\n\nSuggest a COMPLETELY DIFFERENT idea that solves the same problem but takes a radically different approach.\n\nRespond with ONLY a valid JSON object (no markdown, no backticks, no extra text). Use these exact fields:\n{"title": "short name for this alternative", "description": "3-4 sentences explaining this new direction"}`
+        content: `You are a design expert. 
+        A designer has proposed:\n\n"${idea}"\n\nSuggest a COMPLETELY DIFFERENT idea that solves the same problem but takes a 
+        radically different approach.Keep it concise and simple to understand, no need for lengthy explanations.\n\nRespond with ONLY a valid JSON object (no markdown, no backticks, no extra text). 
+        Use these exact fields:\n{"title": "short name for this alternative", "description": "3-4 sentences explaining this new direction and how it's better or different than the original idea"}`
       }],
       temperature: 0.8,
     });
@@ -57,7 +64,12 @@ app.post('/api/get-suggestions', async (req, res) => {
       model: "gpt-4o",
       messages: [{
         role: "user",
-        content: `You are a design critic. A designer proposed:\n\n"${idea}"\n\nIdentify potential FLAWS, CHALLENGES, or CONCERNS with this idea. What could go wrong? What assumptions might be incorrect? What important aspects might be overlooked?\n\nRespond with ONLY a valid JSON object (no markdown, no backticks, no extra text). Use these exact fields:\n{"title": "main concern or flaw", "description": "3-4 sentences explaining the challenge or flaw in detail", "suggestion": "1-2 sentences on how to address or mitigate this concern"}`
+        content: `You are a design expert. 
+        A designer proposed:\n\n"${idea}"\n\nIdentify potential FLAWS, CHALLENGES, or CONCERNS with this idea. What could go wrong? 
+        What assumptions might be incorrect? What important aspects might be overlooked?Keep it concise and simple to understand, no need for lengthy explanations.\n\nRespond with ONLY a valid JSON object 
+        (no markdown, no backticks, no extra text). 
+        Use these exact fields:\n{"title": "main concern or flaw", "description": "3-4 sentences explaining the challenge or flaw in detail",
+         "suggestion": "1-2 sentences on how to address or mitigate this concern"}`
       }],
       temperature: 0.6,
     });
