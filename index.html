@@ -285,8 +285,14 @@
         const resultsEl = document.getElementById('results');
         const statusEl = document.getElementById('status');
         const generateBtn = document.getElementById('generateBtn');
+        let currentStep = 0;
+        let savedIdea = "";
+        let savedSuggestions = null;
 
         async function generateSuggestions() {
+            currentStep = 0;
+            savedSuggestions = null;
+            savedIdea = "";
             const idea = document.getElementById("prompt").value.trim();
             
             if (!idea) {
@@ -311,7 +317,11 @@
                 }
                 
                 const data = await response.json();
-                renderSuggestions(data);
+                //renderSuggestions(data);
+                savedSuggestions = data;
+                savedIdea = idea;
+                currentStep = 1;
+                renderStep();
                 setStatus("Suggestions generated!");
             } catch (error) {
                 setStatus(error.message, "error");
@@ -326,19 +336,19 @@
             const suggestions = [
                 {
                     key: "improved",
-                    //label: "✨ Improved",
+                    label: "✨ Improvement",
                     type: "improved",
                     data: data.improved
                 },
                 {
                     key: "alternative",
-                    //label: "🔄 Alternative",
+                    label: "🔄 Alternative",
                     type: "alternative",
                     data: data.alternative
                 },
                 {
                     key: "challenges",
-                    //label: "⚠️ Challenges & Concerns",
+                    label: "⚠️ Challenges & Concerns",
                     type: "challenges",
                     data: data.challenges
                 }
@@ -350,7 +360,7 @@
             });
         }
 
-        function createCard(suggestion) {
+        /*function createCard(suggestion) {
             const card = document.createElement("div");
             card.className = `suggestion-card ${suggestion.type}`;
             
@@ -385,11 +395,98 @@
             card.appendChild(actions);
             
             return card;
-        }
+        }*/
 
         function setStatus(message, type = "info") {
             statusEl.textContent = message;
             statusEl.className = `status ${type}`;
+        }
+
+        function renderStep() {
+            resultsEl.innerHTML = "";
+
+            if (currentStep === 1) {
+                resultsEl.innerHTML = `
+                    <div class="suggestion-card improved">
+                        <p class="card-description"> You will now receive AI-generated suggestions to reflect on your idea.</p>
+                        <div class="card-label">Step 1 of 5: Your Original Idea</div>
+                        <h3 class="card-title">Your idea</h3>
+                        <p class="card-description">${savedIdea}</p>
+                        <button onclick="nextStep()">Continue to AI Suggestions</button>
+                    </div>
+                `;
+            }
+
+            if (currentStep === 2) {
+                renderSingleSuggestion(
+                    "✨ Improvement Suggestion: Refine  your idea",
+                    "improved",
+                    savedSuggestions.improved,
+                    "This suggestion keeps your original idea, but tries to strengthen or refine it."
+                );
+            }
+
+            if (currentStep === 3) {
+                renderSingleSuggestion(
+                    "🔄 Alternative Direction: Explore a different approach",
+                    "alternative",
+                    savedSuggestions.alternative,
+                    "This suggestion proposes a different way to solve the same problem."
+                );
+            }
+
+            if (currentStep === 4) {
+                renderSingleSuggestion(
+                    "⚠️ Critical Reflection: Identify potential issues",
+                    "challenges",
+                    savedSuggestions.challenges,
+                    "This suggestion challenges your idea by pointing out possible weaknesses or assumptions."
+                );
+            }
+
+            if (currentStep === 5) {
+                resultsEl.innerHTML = `
+                    <div class="suggestion-card">
+                        <div class="card-label">Step 5 of 5: Final Reflection</div>
+                        <h3 class="card-title">Revise your idea</h3>
+                        <p class="card-description">Based on the suggestions, would you change your original idea?</p>
+                        <textarea id="finalIdea">${savedIdea}</textarea>
+                    </div>
+                `;
+            }
+}
+        function renderSingleSuggestion(label, type, data, explanation) {
+            resultsEl.innerHTML = `
+                <div class="suggestion-card ${type}">
+                    <div class="card-label">${label}</div>
+                    <h3 class="card-title">${data.title || "Untitled"}</h3>
+                    <p class="card-description">${data.description || ""}</p>
+                    <p class="card-explanation">${explanation}</p>
+
+                    <div class="card-actions">
+                        <button onclick="logDecision('${type}', 'accept')">Accept</button>
+                        <button onclick="logDecision('${type}', 'ignore')">Ignore</button>
+                        <button onclick="logDecision('${type}', 'modify')">Modify</button>
+                    </div>
+
+                    <br>
+                    <button onclick="nextStep()">Next</button>
+                </div>
+            `;
+}    
+        function nextStep() {
+            currentStep++;
+            renderStep();
+        }
+
+        function logDecision(type, decision) {
+            console.log({
+                suggestionType: type,
+                decision: decision,
+                timestamp: new Date().toISOString()
+            });
+
+            alert(`Logged: ${decision} for ${type}`);
         }
     </script>
 </body>
