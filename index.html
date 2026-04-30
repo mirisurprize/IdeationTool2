@@ -470,6 +470,7 @@
                     </div>
 
                     <br>
+                    <button onclick="regenerateCurrentSuggestion('${type}')">Generate another ${type}</button>
                     <button onclick="nextStep()">Next</button>
                 </div>
             `;
@@ -478,6 +479,48 @@
             currentStep++;
             renderStep();
         }
+
+        async function regenerateCurrentSuggestion(type) {
+            setStatus("Generating another suggestion...", "loading");
+
+            try {
+                const response = await fetch('/api/regenerate-suggestion', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        idea: savedIdea,
+                        type: type
+                    })
+                });
+
+                if (!response.ok) {
+                    const error = await response.text();
+                    throw new Error(error || `Server error: ${response.status}`);
+                }
+
+                const data = await response.json();
+
+                if (type === "improved") {
+                    savedSuggestions.improved = data;
+                    currentStep = 2;
+                }
+
+                if (type === "alternative") {
+                    savedSuggestions.alternative = data;
+                    currentStep = 3;
+                }
+
+                if (type === "challenges") {
+                    savedSuggestions.challenges = data;
+                    currentStep = 4;
+                }
+
+                renderStep();
+                setStatus("New suggestion generated!");
+            } catch (error) {
+                setStatus(error.message, "error");
+            }
+}
 
         function logDecision(type, decision) {
             console.log({

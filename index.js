@@ -98,6 +98,82 @@ app.post('/api/get-suggestions', async (req, res) => {
   }
 });
 
+app.post('/api/regenerate-suggestion', async (req, res) => {
+  const { idea, type } = req.body;
+
+  if (!idea || !type) {
+    return res.status(400).json({ error: "Please provide an idea and suggestion type." });
+  }
+
+  let prompt = "";
+
+  if (type === "improved") {
+    prompt = `You are a design expert.
+A designer has proposed this idea:
+
+"${idea}"
+
+Provide a NEW improvement suggestion that is different from previous improvements.
+Keep the core concept but suggest enhancements, refinements, or better execution.
+Keep it concise and simple to understand.
+
+Respond with ONLY a valid JSON object.
+Use these exact fields:
+{"title": "short name for the improvement", "description": "3-4 sentences explaining the enhancement"}`;
+  }
+
+  if (type === "alternative") {
+    prompt = `You are a design expert.
+A designer has proposed this idea:
+
+"${idea}"
+
+Suggest a NEW alternative direction that solves the same problem in a different way.
+Do not repeat obvious or generic alternatives.
+Keep it concise and simple to understand.
+
+Respond with ONLY a valid JSON object.
+Use these exact fields:
+{"title": "short name for this alternative", "description": "3-4 sentences explaining this new direction"}`;
+  }
+
+  if (type === "challenges") {
+    prompt = `You are a design expert.
+A designer proposed this idea:
+
+"${idea}"
+
+Identify a NEW potential flaw, challenge, or concern with this idea.
+Focus on a different issue than typical usability or motivation concerns if possible.
+Keep it concise and simple to understand.
+
+Respond with ONLY a valid JSON object.
+Use these exact fields:
+{"title": "main concern or flaw", "description": "3-4 sentences explaining the challenge", "suggestion": "1-2 sentences on how to address or mitigate this concern"}`;
+  }
+
+  try {
+    const completion = await openai.chat.completions.create({
+      model: "gpt-4o",
+      messages: [{ role: "user", content: prompt }],
+      temperature: 0.8,
+    });
+
+    function parseJSON(str) {
+      let cleaned = str.trim();
+      cleaned = cleaned.replace(/^```[\w]*\n?/m, '').replace(/\n?```$/m, '');
+      return JSON.parse(cleaned);
+    }
+
+    const result = parseJSON(completion.choices[0].message.content);
+    res.json(result);
+
+  } catch (error) {
+    console.error("Error:", error);
+    res.status(500).json({ error: error.message || "Failed to regenerate suggestion." });
+  }
+});
+
 app.listen(3001, () => {
   console.log("✓ Server running on http://localhost:3001");
   console.log("✓ Make sure OPENAI_API_KEY is set in your environment");
