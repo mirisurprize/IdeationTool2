@@ -22,7 +22,7 @@ const openai = new OpenAI({
 });
 
 // Debug: Show which API key is loaded
-console.log("🔑 API Key loaded (first 20 chars):", process.env.OPENAI_API_KEY?.substring(0, 20));
+//console.log("🔑 API Key loaded (first 20 chars):", process.env.OPENAI_API_KEY?.substring(0, 20));
 
 app.post('/api/get-suggestions', async (req, res) => {
   const { idea } = req.body;
@@ -48,7 +48,7 @@ app.post('/api/get-suggestions', async (req, res) => {
 
     // Call 2: Completely different
     const alternative = await openai.chat.completions.create({
-      model: "gpt-4o",
+      model: "gpt-4o-mini",
       messages: [{
         role: "user",
         content: `You are a design expert. 
@@ -61,7 +61,7 @@ app.post('/api/get-suggestions', async (req, res) => {
 
     // Call 3: Challenges & concerns
     const challenges = await openai.chat.completions.create({
-      model: "gpt-4o",
+      model: "gpt-4o-mini",
       messages: [{
         role: "user",
         content: `You are a design expert. 
@@ -154,7 +154,7 @@ Use these exact fields:
 
   try {
     const completion = await openai.chat.completions.create({
-      model: "gpt-4o",
+      model: "gpt-4o-mini",
       messages: [{ role: "user", content: prompt }],
       temperature: 0.8,
     });
@@ -174,8 +174,14 @@ Use these exact fields:
   }
 });
 
-app.listen(3001, () => {
+/*app.listen(3001, () => {
   console.log("✓ Server running on http://localhost:3001");
   console.log("✓ Make sure OPENAI_API_KEY is set in your environment");
+});*/
+
+const PORT = process.env.PORT || 3001;
+
+app.listen(PORT, () => {
+  console.log(`✓ Server running on port ${PORT}`);
 });
 

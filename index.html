@@ -264,8 +264,8 @@
 </head>
 <body>
     <div class="container">
-        <h1>Design Suggestion Generator</h1>
-        <p class="subtitle">Enter your design idea and get three perspectives</p>
+        <h1>Design Feedback Generator</h1>
+        <p class="subtitle">Task explanation...</p>
 
         <div class="input-section">
             <div class="form-group">
@@ -288,6 +288,7 @@
         let currentStep = 0;
         let savedIdea = "";
         let savedSuggestions = null;
+        let modificationsLog = [];
 
         async function generateSuggestions() {
             currentStep = 0;
@@ -455,6 +456,7 @@
                 `;
             }
 }
+        
         function renderSingleSuggestion(label, type, data, explanation) {
             resultsEl.innerHTML = `
                 <div class="suggestion-card ${type}">
@@ -464,22 +466,73 @@
                     <p class="card-explanation">${explanation}</p>
 
                     <div class="card-actions">
-                        <button onclick="logDecision('${type}', 'accept')">Accept</button>
-                        <button onclick="logDecision('${type}', 'ignore')">Ignore</button>
-                        <button onclick="logDecision('${type}', 'modify')">Modify</button>
+                        <button onclick="chooseAndContinue('${type}', 'accept')">Accept</button>
+                        <button onclick="chooseAndContinue('${type}', 'ignore')">Ignore</button>
+                        <button onclick="showModifyBox('${type}')">Modify</button>
+                    </div>
+
+                    <div id="modifyBox-${type}" style="display:none; margin-top: 1rem;">
+                        <label for="modifiedText-${type}">How would you modify your idea based on this suggestion?</label>
+                        <textarea id="modifiedText-${type}">${savedIdea}</textarea>
+                        <button onclick="saveModification('${type}')">Save modification</button>
                     </div>
 
                     <br>
-                    <button onclick="regenerateCurrentSuggestion('${type}')">Generate another ${type}</button>
+                    <button onclick="regenerateCurrentSuggestion('${type}')">Generate one more ${type}</button>
                     <button onclick="nextStep()">Next</button>
                 </div>
             `;
 }    
+        
         function nextStep() {
             currentStep++;
             renderStep();
         }
+        
+        function chooseAndContinue(type, decision) {
+            logDecision(type, decision);
+            nextStep();
+        }
+        
+        function showModifyBox(type) {
+            logDecision(type, "modify_started");
 
+            const box = document.getElementById(`modifyBox-${type}`)
+            if (box) {
+                box.style.display = "block";
+            }
+
+            setStatus("Modify your idea, then save when ready.", "info");
+        }
+
+        function saveModification(type) {
+            const modifiedText = document.getElementById(`modifiedText-${type}`).value.trim();
+
+            if (!modifiedText) {
+                setStatus("Please write a modified idea before saving.", "error");
+                return;
+            }
+
+            modificationsLog.push({
+                step: currentStep,
+                suggestionType: type,
+                previousIdea: savedIdea,
+                modifiedIdea: modifiedText,
+                timestamp: new Date().toISOString()
+            });
+
+            savedIdea = modifiedText;
+            logDecision(type, "modify_saved");
+            console.log("Modification saved:", modificationsLog);
+
+            setStatus("Modification saved. You can continue.", "info");
+
+            const box = document.getElementById(`modifyBox-${type}`);
+            if (box) {
+                box.style.display = "none";
+            }
+        }
+        
         async function regenerateCurrentSuggestion(type) {
             setStatus("Generating another suggestion...", "loading");
 
