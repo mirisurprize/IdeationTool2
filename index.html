@@ -34,7 +34,7 @@
         }
 
         .subtitle {
-            color: #94a3b8;
+            color: #cbcdcf;
             margin-bottom: 2rem;
             font-size: 1.1rem;
         }
@@ -265,8 +265,22 @@
 <body>
     <div class="container">
         <h1>Design Feedback Generator</h1>
-        <p class="subtitle">Task explanation...</p>
-
+        <p class="subtitle"> <b>Brief:</b><i> "Helsenorge wants to help sudents who often procrastinates and who feel 
+            overwhelmed by study tasks and everyday responsibilities. 
+            They have noticed that many students struggle to break tasks down, 
+            prioritize what to do first, and stay motivated without feeling stressed or guilty.
+             Your assignment is to design a digital product or service concept that can help students 
+             manage responsibilities in a way that feels supportive, motivating, and realistic to follow through</i></p>
+             <br>
+             <p><b>About the test:</b></p>
+             <br>
+             <p>In this test, you will enter your design idea based on the brief above. 
+                After you submit your idea, you will receive AI-generated feedback in three different styles:
+                 improvement suggestions, alternative directions, and possible challenges. You can choose which 
+                 type of feedback to receive first, and after seeing each suggestion, you can decide whether to accept it, 
+                 ignore it, or modify your original idea based on it. The goal is to help you reflect on your design concept 
+                 from multiple perspectives and refine it iteratively.</p>    
+            <br>
         <div class="input-section">
             <div class="form-group">
                 <label for="prompt">Your Design Idea</label>
@@ -289,6 +303,8 @@
         let savedIdea = "";
         let savedSuggestions = null;
         let modificationsLog = [];
+        let selectedType = "";
+        let currentFeedback = null;
 
         async function generateSuggestions() {
             currentStep = 0;
@@ -305,30 +321,11 @@
             resultsEl.innerHTML = "";
             generateBtn.disabled = true;
             
-            try {
-                const response = await fetch('/api/get-suggestions', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ idea })
-                });
-                
-                if (!response.ok) {
-                    const error = await response.text();
-                    throw new Error(error || `Server error: ${response.status}`);
-                }
-                
-                const data = await response.json();
-                //renderSuggestions(data);
-                savedSuggestions = data;
-                savedIdea = idea;
-                currentStep = 1;
-                renderStep();
-                setStatus("Suggestions generated!");
-            } catch (error) {
-                setStatus(error.message, "error");
-            } finally {
-                generateBtn.disabled = false;
-            }
+            savedIdea = idea;
+            currentStep = 1;
+            renderStep();
+            setStatus("Idea saved. Choose a feedback style.");
+            generateBtn.disabled = false;
         }
 
         function renderSuggestions(data) {
@@ -403,7 +400,7 @@
             statusEl.className = `status ${type}`;
         }
 
-        function renderStep() {
+       /* function renderStep() {
             resultsEl.innerHTML = "";
 
             if (currentStep === 1) {
@@ -455,8 +452,113 @@
                     </div>
                 `;
             }
-}
-        
+}*/
+
+        function renderStep() {
+            resultsEl.innerHTML = "";
+
+            if (currentStep === 1) {
+                resultsEl.innerHTML = `
+                  <div class="suggestion-card">
+                     <div class="card-label">Your Idea</div>
+                     <h3 class="card-title">Original concept</h3>
+                     <p class="card-description">${savedIdea}</p>
+
+                     <h3 class="card-title">Choose feedback style</h3>
+                     <p class="card-description">Select what kind of AI feedback you want to receive.</p>
+
+                     <div class="card-actions">
+                          <button onclick="selectFeedbackType('improved')">Improve — refine the current idea</button>
+                          <button onclick="selectFeedbackType('alternative')">Alternative — explore another direction</button>
+                         <button onclick="selectFeedbackType('challenges')">Challenge — identify possible weaknesses</button>
+                        </div>
+                 </div>
+             `;
+         }
+
+            if (currentStep === 2) {
+                renderSingleSuggestion(
+                    getFeedbackLabel(selectedType),
+                    selectedType,
+                    currentFeedback,
+                    getFeedbackExplanation(selectedType)
+                );
+            }
+
+            if (currentStep === 3) {
+                resultsEl.innerHTML = `
+                 <div class="suggestion-card">
+                        <div class="card-label">Next step</div>
+                        <h3 class="card-title">What would you like to do now?</h3>
+                        <p class="card-description">Current idea:</p>
+                        <p class="card-description">${savedIdea}</p>
+
+                        <div class="card-actions">
+                            <button onclick="stayInSameFeedback()">Stay in this feedback style</button>
+                            <button onclick="switchFeedbackStyle()">Switch feedback style</button>
+                            <button onclick="finalizeIdea()">Finalize idea</button>
+                        </div>
+                    </div>
+             `;
+            }
+
+            if (currentStep === 4) {
+                resultsEl.innerHTML = `
+                 <div class="suggestion-card">
+                        <div class="card-label">Final idea</div>
+                        <h3 class="card-title">Your final concept</h3>
+                        <textarea id="finalIdea">${savedIdea}</textarea>
+                    </div>
+                `;
+            }
+        }
+
+        async function selectFeedbackType(type) {
+         selectedType = type;
+         await generateSingleFeedback(type);
+        }
+
+        async function generateSingleFeedback(type) {
+            setStatus("Generating feedback...", "loading");
+
+            try {
+                const response = await fetch('/api/regenerate-suggestion', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        idea: savedIdea,
+                        type: type
+                    })
+                });
+
+                if (!response.ok) {
+                    const error = await response.text();
+                    throw new Error(error || `Server error: ${response.status}`);
+                }
+
+                currentFeedback = await response.json();
+                currentStep = 2;
+                renderStep();
+                setStatus("Feedback generated!");
+            } catch (error) {
+                setStatus(error.message, "error");
+            }
+        }
+
+        function getFeedbackLabel(type) {
+            if (type === "improved") return "Improvement Feedback";
+            if (type === "alternative") return "Alternative Direction";
+            if (type === "challenges") return "Critical Challenge";
+            return "Feedback";
+        }
+
+        function getFeedbackExplanation(type) {
+            if (type === "improved") return "This feedback keeps your core idea, but suggests refinements.";
+            if (type === "alternative") return "This feedback proposes a different direction for the same problem.";
+            if (type === "challenges") return "This feedback points out possible weaknesses or assumptions.";
+         return "";
+        }
+
         function renderSingleSuggestion(label, type, data, explanation) {
             resultsEl.innerHTML = `
                 <div class="suggestion-card ${type}">
@@ -491,7 +593,8 @@
         
         function chooseAndContinue(type, decision) {
             logDecision(type, decision);
-            nextStep();
+            currentStep = 3;
+            renderStep();
         }
         
         function showModifyBox(type) {
@@ -531,9 +634,12 @@
             if (box) {
                 box.style.display = "none";
             }
+
+                currentStep = 3;
+                renderStep();   
         }
         
-        async function regenerateCurrentSuggestion(type) {
+       /* async function regenerateCurrentSuggestion(type) {
             setStatus("Generating another suggestion...", "loading");
 
             try {
@@ -573,14 +679,34 @@
             } catch (error) {
                 setStatus(error.message, "error");
             }
-}
+}*/
 
+        async function regenerateCurrentSuggestion(type) {
+            await generateSingleFeedback(type);
+        }
+       
+        function stayInSameFeedback() {
+            generateSingleFeedback(selectedType);
+        }
+
+        function switchFeedbackStyle() {
+            currentStep = 1;
+            renderStep();
+        }
+
+        function finalizeIdea() {
+            currentStep = 4;
+            renderStep();
+        }
+        
         function logDecision(type, decision) {
             console.log({
                 suggestionType: type,
                 decision: decision,
                 timestamp: new Date().toISOString()
             });
+            setStatus(`Saved: ${decision}`, "info");
+        }
 
             alert(`Logged: ${decision} for ${type}`);
         }
