@@ -260,6 +260,18 @@
                 width: 100%;
             }
         }
+
+        .finish-btn {
+            background: #16a34a;
+            border: none;
+            color: white;
+        }
+
+        .finish-btn:hover {
+            background: #15803d;
+            transform: translateY(-1px);
+        }
+
     </style>
 </head>
 <body>
@@ -504,9 +516,29 @@
                         <div class="card-label">Final idea</div>
                         <h3 class="card-title">Your final concept</h3>
                         <textarea id="finalIdea">${savedIdea}</textarea>
+                    
+                    <div class="card-actions">
+                    <button class="finish-btn" onclick="finishStudy()">Finish</button>
                     </div>
+                </div>
                 `;
-            }
+            } if (currentStep === 5) {
+            resultsEl.innerHTML = `
+                <div class="suggestion-card">
+                    <div class="card-label">Study complete</div>
+                    <h3 class="card-title">Thank you for participating!</h3>
+                    <p class="card-description">
+                        Your responses have been recorded.
+                    </p>
+
+                    <p class="card-description">
+                        Final idea:
+                    </p>
+
+                 <textarea readonly>${savedIdea}</textarea>
+                </div>
+            `;
+}
         }
 
         async function selectFeedbackType(type) {
@@ -691,6 +723,17 @@
 
         function finalizeIdea() {
             currentStep = 4;
+            renderStep();
+        }
+        
+        function finishStudy() {
+            const finalText = document.getElementById("finalIdea").value.trim();
+    
+            if (finalText) {
+                savedIdea = finalText;
+            }
+
+            currentStep = 5;
             renderStep();
         }
         
